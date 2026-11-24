@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
-import 'screen1.dart';
-import 'screen2.dart';
-import 'screen3.dart';
-import 'screen4.dart';
-
 void main() {
   runApp(const MyApp());
+}
+
+class Car {
+  final String make;
+  final String model;
+  final int price;
+
+  Car({required this.make, required this.model, required this.price});
 }
 
 class MyApp extends StatelessWidget {
@@ -16,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Lab 05 - Part 1',
+      title: 'Lab 05 - Part 2',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),
         scaffoldBackgroundColor: Colors.pink.shade50,
@@ -26,55 +29,139 @@ class MyApp extends StatelessWidget {
           centerTitle: true,
         ),
       ),
-      home: const MainNavigationScreen(),
+      home: const CarDataTableScreen(),
     );
   }
 }
 
-class MainNavigationScreen extends StatefulWidget {
-  const MainNavigationScreen({super.key});
+class CarDataTableScreen extends StatefulWidget {
+  const CarDataTableScreen({super.key});
 
   @override
-  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+  State<CarDataTableScreen> createState() => _CarDataTableScreenState();
 }
 
-class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  int _selectedIndex = 0;
+class _CarDataTableScreenState extends State<CarDataTableScreen> {
+  int? _sortColumnIndex;
+  bool _isAscending = true;
 
-  final List<Widget> _screens = const [
-    Screen1(),
-    Screen2(),
-    Screen3(),
-    Screen4(),
+  final List<Car> _cars = [
+    Car(make: 'Toyota', model: 'Camry', price: 145000),
+    Car(make: 'Honda', model: 'Civic', price: 132000),
+    Car(make: 'Perodua', model: 'Myvi', price: 54000),
+    Car(make: 'Proton', model: 'X50', price: 98000),
+    Car(make: 'Mazda', model: 'CX-5', price: 158000),
   ];
 
-  void _onItemTapped(int index) {
+  void _onSort(int columnIndex, bool ascending) {
     setState(() {
-      _selectedIndex = index;
+      _sortColumnIndex = columnIndex;
+      _isAscending = ascending;
+
+      if (columnIndex == 0) {
+        _cars.sort(
+          (a, b) =>
+              ascending ? a.make.compareTo(b.make) : b.make.compareTo(a.make),
+        );
+      } else if (columnIndex == 1) {
+        _cars.sort(
+          (a, b) => ascending
+              ? a.model.compareTo(b.model)
+              : b.model.compareTo(a.model),
+        );
+      } else if (columnIndex == 2) {
+        _cars.sort(
+          (a, b) => ascending
+              ? a.price.compareTo(b.price)
+              : b.price.compareTo(a.price),
+        );
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('BottomNavigationBar Demo')),
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.pink.shade100,
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.pink.shade800,
-        unselectedItemColor: Colors.pink.shade300,
-        onTap: _onItemTapped,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.alarm), label: 'Alarm'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.business),
-            label: 'Business',
+      appBar: AppBar(title: const Text('Sortable Car DataTable')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Card(
+            color: Colors.white,
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: Colors.pink.shade200, width: 1.5),
+            ),
+            child: DataTable(
+              sortColumnIndex: _sortColumnIndex,
+              sortAscending: _isAscending,
+              headingRowColor: WidgetStateProperty.all(Colors.pink.shade100),
+              columns: [
+                DataColumn(
+                  label: Text(
+                    'Car Make',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.pink.shade900,
+                    ),
+                  ),
+                  onSort: _onSort,
+                ),
+                DataColumn(
+                  label: Text(
+                    'Model',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.pink.shade900,
+                    ),
+                  ),
+                  onSort: _onSort,
+                ),
+                DataColumn(
+                  label: Text(
+                    'Price (RM)',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.pink.shade900,
+                    ),
+                  ),
+                  numeric: true,
+                  onSort: _onSort,
+                ),
+              ],
+              rows: List<DataRow>.generate(_cars.length, (index) {
+                final car = _cars[index];
+                return DataRow(
+                  color: WidgetStateProperty.all(
+                    index.isEven ? Colors.white : Colors.pink.shade50,
+                  ),
+                  cells: [
+                    DataCell(
+                      Text(
+                        car.make,
+                        style: TextStyle(color: Colors.pink.shade900),
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        car.model,
+                        style: TextStyle(color: Colors.pink.shade900),
+                      ),
+                    ),
+                    DataCell(
+                      Text(
+                        car.price.toString(),
+                        style: TextStyle(color: Colors.pink.shade900),
+                      ),
+                    ),
+                  ],
+                );
+              }),
+            ),
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.school), label: 'School'),
-        ],
+        ),
       ),
     );
   }
