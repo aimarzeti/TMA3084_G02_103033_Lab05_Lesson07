@@ -51,7 +51,23 @@ class _CarDataTableScreenState extends State<CarDataTableScreen> {
     Car(make: 'Perodua', model: 'Myvi', price: 54000),
     Car(make: 'Proton', model: 'X50', price: 98000),
     Car(make: 'Mazda', model: 'CX-5', price: 158000),
+    Car(make: 'Toyota', model: 'GR86', price: 295000),
   ];
+
+  String _searchQuery = '';
+
+  List<Car> get _filteredCars {
+    final query = _searchQuery.trim().toLowerCase();
+    if (query.isEmpty) return _cars;
+    return _cars
+        .where(
+          (car) =>
+              car.make.toLowerCase().contains(query) ||
+              car.model.toLowerCase().contains(query),
+        )
+        .toList();
+  }
+
 
   void _onSort(int columnIndex, bool ascending) {
     setState(() {
@@ -85,9 +101,23 @@ class _CarDataTableScreenState extends State<CarDataTableScreen> {
       appBar: AppBar(title: const Text('Sortable Car DataTable')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Card(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              decoration: const InputDecoration(
+                labelText: 'Search by make or model',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) => setState(() => _searchQuery = value),
+            ),
+            const SizedBox(height: 8),
+            Text('${_filteredCars.length} cars match'),
+            const SizedBox(height: 8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Card(
             color: Colors.white,
             elevation: 4,
             shape: RoundedRectangleBorder(
@@ -131,8 +161,8 @@ class _CarDataTableScreenState extends State<CarDataTableScreen> {
                   onSort: _onSort,
                 ),
               ],
-              rows: List<DataRow>.generate(_cars.length, (index) {
-                final car = _cars[index];
+              rows: List<DataRow>.generate(_filteredCars.length, (index) {
+                final car = _filteredCars[index];
                 return DataRow(
                   color: WidgetStateProperty.all(
                     index.isEven ? Colors.white : Colors.pink.shade50,
@@ -159,8 +189,9 @@ class _CarDataTableScreenState extends State<CarDataTableScreen> {
                   ],
                 );
               }),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
