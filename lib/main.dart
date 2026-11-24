@@ -51,6 +51,7 @@ class _CarDataTableScreenState extends State<CarDataTableScreen> {
     Car(make: 'Perodua', model: 'Myvi', price: 54000),
     Car(make: 'Proton', model: 'X50', price: 98000),
     Car(make: 'Mazda', model: 'CX-5', price: 158000),
+    Car(make: 'Toyota', model: 'GR86', price: 295000),
   ];
 
   void _onSort(int columnIndex, bool ascending) {
